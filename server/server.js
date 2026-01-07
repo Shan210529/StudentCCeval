@@ -5,10 +5,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Student = require('./models/Student');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-// Use Environment Variable for DB Connection (Critical for Render)
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/student_db';
 
 // Middleware
@@ -16,7 +16,9 @@ app.use(cors());
 app.use(express.json());
 
 // Serve Static Files (The React App)
-app.use(express.static(path.join(__dirname, '../client/dist')));
+const clientBuildPath = path.join(__dirname, '../client/dist');
+console.log('Serving static files from:', clientBuildPath);
+app.use(express.static(clientBuildPath));
 
 // MongoDB Connection
 mongoose.connect(MONGO_URI)
@@ -49,9 +51,15 @@ app.post('/api/register', async (req, res) => {
 
 // Catch-all handler: Send React's index.html for any other route
 app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    const indexPath = path.join(clientBuildPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send('Frontend build not found. Please ensure npm run build ran successfully. Checked path: ' + indexPath);
+    }
 });
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log('Current directory:', __dirname);
 });
