@@ -27,8 +27,8 @@ export default function App() {
     setStatus({ type: null, message: '' });
 
     try {
-      // Connecting to the backend running on port 5000
-      const res = await axios.post('http://localhost:5000/api/register', formData);
+      // Use relative path - works for both localhost (with proxy) and production
+      const res = await axios.post('/api/register', formData);
       setStatus({ type: 'success', message: 'Registration Successful! Welcome aboard.' });
       // Reset form
       setFormData({

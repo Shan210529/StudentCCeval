@@ -1,3 +1,5 @@
+
+const path = require('path');
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -6,36 +8,32 @@ const Student = require('./models/Student');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// Use Environment Variable for DB Connection (Critical for Render)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/student_db';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+// Serve Static Files (The React App)
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
 // MongoDB Connection
-// Connecting to local Compass instance (default port 27017)
-mongoose.connect('mongodb://127.0.0.1:27017/student_db')
+mongoose.connect(MONGO_URI)
     .then(() => console.log('Connected to MongoDB Successfully'))
     .catch(err => console.error('Could not connect to MongoDB', err));
 
-// Routes
+// API Routes
 app.post('/api/register', async (req, res) => {
     try {
         const { firstName, lastName, email, phone, dob, gender, course, address } = req.body;
 
-        // Basic server-side validation
         if (!firstName || !lastName || !email || !course) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
         const newStudent = new Student({
-            firstName,
-            lastName,
-            email,
-            phone,
-            dob,
-            gender,
-            course,
-            address
+            firstName, lastName, email, phone, dob, gender, course, address
         });
 
         await newStudent.save();
@@ -49,10 +47,11 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('Student Registration API is running.');
+// Catch-all handler: Send React's index.html for any other route
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

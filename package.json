@@ -1,0 +1,13 @@
+{
+    "name": "student-registration-app",
+    "version": "1.0.0",
+    "description": "Deployment root",
+    "scripts": {
+        "build": "cd client && npm install && npm run build && cd ../server && npm install",
+        "start": "cd server && node server.js"
+    },
+    "dependencies": {},
+    "engines": {
+        "node": ">=16.0.0"
+    }
+}
