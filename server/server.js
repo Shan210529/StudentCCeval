@@ -15,10 +15,17 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/student_db
 app.use(cors());
 app.use(express.json());
 
+// Request Logger
+app.use((req, res, next) => {
+    console.log(`[Request] ${req.method} ${req.url}`);
+    next();
+});
+
 // Serve Static Files (The React App)
 const clientBuildPath = path.join(__dirname, '../client/dist');
 console.log('Serving static files from:', clientBuildPath);
 app.use(express.static(clientBuildPath));
+app.use('/assets', express.static(path.join(clientBuildPath, 'assets')));
 
 // MongoDB Connection
 mongoose.connect(MONGO_URI)
